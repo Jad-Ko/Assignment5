@@ -1,26 +1,44 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Assignment 5</title>
-</head>
-<body>
-    <h1>Students List</h1>
-    <a href="{{route('students.create')}}">Add New Student</a>
-    <ul>
-        @foreach ($students as $student)
-        <li> {{$student->name}} ({{$student->age}}) 
-            <a href="{{route('students.show', $student->id)}}">Show</a>
-            <a href="{{route('students.edit', $student->id)}}">Edit</a>
-            <form action="{{route('students.destroy',$student->id)}}" method="POST">
-        @csrf
-        @method('Delete')
-       <button type="submit">Delete</button>
-       </form>
+@extends('layout')
+@section('title', 'Student List')
+@section('content')
 
-        </li>
-        @endforeach
-    </ul>
-</body>
-</html>
+<h1 class="mb-4">Student List</h1>
+<div class="row mb-4">
+    <div class="col-md-6">
+        <input type="text" id="searchName" class="form-control" placeholder="Search by Name">
+    </div>
+    <div class="col-md-6">
+        <input type="number" id="filterAge" class="form-control" placeholder="Filter by Age">
+    </div>
+</div>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Age</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody id="studentTable">
+    @include('student_rows', ['students' => $students])
+    </tbody>
+</table>
+<script>
+    $(document).ready(function () {
+    function fetchStudents() {
+        $.ajax({
+            url: "{{ route('students.index') }}",
+            type: "GET",
+            data: {
+                name: $('#searchName').val() || undefined,
+                age: $('#filterAge').val() || undefined
+            },
+            success: function (data) {
+                $('#studentTable').html(data);
+            }
+        });
+    }
+    $('#searchName, #filterAge').on('input', fetchStudents);
+});
+</script>
+@endsection
